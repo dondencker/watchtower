@@ -16,7 +16,10 @@ class WatchtowerServiceProvider extends ServiceProvider{
     public function register()
     {
         $this->app['events']->listen('auth.logout', function(){
-            $this->app['auth']->user()->watchtower()->clearSession();
+            $user = $this->app['auth']->user();
+
+            if( $user && method_exists($user, 'watchtower') )
+                $user->watchtower()->clearSession();
         });
     }
 
