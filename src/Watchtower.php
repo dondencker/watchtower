@@ -110,7 +110,7 @@ class Watchtower
     }
 
 
-    public function hasPermission($permission_code, $silent = false)
+    public function hasPermission($permission_code)
     {
         /*
          * If the user is a superuser, he has access to everything, even when the permission doesn't exist
