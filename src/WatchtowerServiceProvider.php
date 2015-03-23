@@ -6,21 +6,6 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 
 class WatchtowerServiceProvider extends ServiceProvider{
-    /**
-     * @var Dispatcher
-     */
-    private $event;
-    /**
-     * @var Authenticatable
-     */
-    private $auth;
-
-    function __construct($app, Dispatcher $event, Authenticatable $auth)
-    {
-        parent::__construct($app);
-        $this->event = $event;
-        $this->auth = $auth;
-    }
 
     /**
      * Register the service provider.
@@ -30,8 +15,8 @@ class WatchtowerServiceProvider extends ServiceProvider{
 
     public function register()
     {
-        $this->event->listen('auth.logout', function(){
-            $this->auth->user()->watchtower()->clearSession();
+        $this->app['events']->listen('auth.logout', function(){
+            $this->app['auth']->user()->watchtower()->clearSession();
         });
     }
 
