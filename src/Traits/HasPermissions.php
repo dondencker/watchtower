@@ -2,7 +2,6 @@
 
 
 use Dencker\Watchtower\Watchtower;
-use Illuminate\Session\SessionInterface;
 use Illuminate\Support\Facades\App;
 
 trait HasPermissions
@@ -15,10 +14,10 @@ trait HasPermissions
      *
      * @return Watchtower
      */
-    public function watchtower($context = null, $session=null)
+    public function watchtower()
     {
 
-        return $this->watchtower ?: $this->watchtower = new Watchtower($context ?: $this, $session ?: App::make('Session'));
+        return $this->watchtower ?: $this->watchtower = new Watchtower($this, App::make('session')->driver());
     }
 
 
