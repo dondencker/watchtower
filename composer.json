@@ -14,10 +14,7 @@
     }
   },
   "require"    : {
-    "illuminate/database": "~5.0",
-    "illuminate/session" : "~5.0",
-    "illuminate/support" : "~5.0",
-    "illuminate/foundation"  : "~5.0"
+    "laravel/framework": "~5.0"
   },
   "require-dev": {
     "phpspec/phpspec"    : "~2.1",
