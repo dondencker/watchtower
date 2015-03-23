@@ -1,4 +1,5 @@
 <?php namespace Dencker\Watchtower\Models;
+use Dencker\Watchtower\Config;
 
 /**
  * Class Role
@@ -18,6 +19,14 @@ class Role extends AbstractWatchtowerModel
     protected $fillable = ['name', 'code', 'is_super_user'];
     protected $table = "watchtower_roles";
     protected static $primaryActor = null;
+
+    function __construct($attributes = [])
+    {
+        parent::__construct( $attributes );
+
+        if ( is_null( self::getPrimaryActor() ) )
+            self::setPrimaryActor( Config::getPrimaryActor() );
+    }
 
     public static function getPrimaryActor()
     {
