@@ -3,5 +3,6 @@
 
 interface WatchtowerActorContract {
 
-    public function morphToMany($related, $name, $table = null, $foreignKey = null, $otherKey = null, $inverse = false);
+    public function watchtower();
+
 }
