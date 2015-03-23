@@ -1,0 +1,26 @@
+{
+    "name": "rasmusdencker/watchtower",
+    "description": "Roles/permissions for Laravel 5",
+    "authors": [
+        {
+            "name": "Rasmus Dencker",
+            "email": "love@rasmusdencker.dk"
+        }
+    ],
+    "autoload":
+    {
+      "psr-4":{
+        "Dencker\\Watchtower\\":"src/",
+        "spec\\":"spec/"
+      }
+    },
+    "require": {
+      "illuminate/database":"5.*",
+      "illuminate/session":"5.*",
+      "illuminate/support":"5.*"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "~2.1",
+        "laracasts/testdummy": "~2.1"
+    }
+}
