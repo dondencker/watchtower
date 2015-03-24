@@ -33,34 +33,23 @@ class Watchtower
      */
     private $properties = ['roles', 'permissions'];
     /**
-     * @var SessionContract
+     * @var Session
      */
     private $session;
-    /**
-     * @var string
-     */
-    protected $session_prefix;
 
 
-    function __construct(Model $actor, SessionContract $session, $session_prefix = "watchtower_")
+    function __construct(Model $actor, Session $session)
     {
         if ( !$this->modelImplementsWatchtowerContract( $actor ) )
             throw new \ErrorException( "Model must implement Dencker\\Watchtower\\Contracts\\WatchtowerContract" );
 
         $this->actor          = $actor;
         $this->session        = $session;
-        $this->session_prefix = $session_prefix;
     }
 
     public function clearSession()
     {
-        $keys = [
-            $this->getPermissionsSessionKey(),
-            $this->getRolesSessionKey(),
-        ];
-
-        foreach ($keys as $session_identifier)
-            $this->session->remove( $session_identifier );
+        $this->session->clear();
     }
 
 
@@ -71,16 +60,13 @@ class Watchtower
      */
     public function roles()
     {
-        $session_key = $this->getRolesSessionKey();
-
         /*
          * We're storing the relation in a session to minimize the query load.
          */
-        if ( !$roles = $this->session->get( $session_key ) )
+        if ( !$roles = $this->session->getRoles() )
         {
             $roles = $this->actor->morphToMany( 'Dencker\Watchtower\Models\Role', 'actor', 'watchtower_actors' );
-            $this->session->set( $session_key, $roles->get() );
-            $this->session->save();
+            $this->session->setRoles( $roles->get() );
         }
 
 
@@ -90,9 +76,7 @@ class Watchtower
 
     public function permissions()
     {
-        $session_key = $this->getPermissionsSessionKey();
-
-        if ( !$permissions = $this->session->get( $session_key ) )
+        if ( !$permissions = $this->session->getPermissions() )
         {
             $permissions = collect();
 
@@ -102,8 +86,7 @@ class Watchtower
 
             $permissions = $permissions->flatten();
 
-            $this->session->set( $session_key, $permissions );
-            $this->session->save();
+            $this->session->setPermissions( $permissions );
         }
 
         return $permissions;
@@ -133,10 +116,7 @@ class Watchtower
     }
 
 
-    private function sessionKey($identifier)
-    {
-        return $this->session_prefix . $identifier;
-    }
+
 
     public function __get($name)
     {
@@ -148,21 +128,6 @@ class Watchtower
         return is_a( $prop, 'Illuminate\Database\Eloquent\Relations\Relation' ) ? $prop->get() : $prop;
     }
 
-    /**
-     * @return string
-     */
-    public function getPermissionsSessionKey()
-    {
-        return $this->sessionKey( 'permissions' );
-    }
-
-    /**
-     * @return string
-     */
-    public function getRolesSessionKey()
-    {
-        return $this->sessionKey( 'roles' );
-    }
 
     /**
      * @param Model $actor

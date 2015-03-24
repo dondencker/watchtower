@@ -3,6 +3,7 @@
     namespace spec\Dencker\Watchtower;
 
     use Dencker\Watchtower\Config;
+    use Dencker\Watchtower\Session;
     use Illuminate\Database\Eloquent\Collection;
     use Illuminate\Database\Eloquent\Relations\MorphToMany;
     use Illuminate\Session\SessionInterface as SessionContract;
@@ -19,10 +20,10 @@
         protected $roles_collection;
 
         /**
-         * @param \spec\stubs\Actor                    $actor
-         * @param \Illuminate\Session\SessionInterface $session
+         * @param \spec\stubs\Actor       $actor
+         * @param \Dencker\Watchtower\Session $session
          */
-        public function let(Actor $actor, SessionContract $session)
+        public function let(Actor $actor, Session $session)
         {
             $config = (new Prophet)->prophesize('\Dencker\Watchtower\Config');
             $config->get('primary_actor')->willReturn('spec\stubs\Actor');
@@ -58,13 +59,11 @@
 
         function it_saves_roles_to_the_session_after_the_first_database_call(MorphToMany $morphToMany)
         {
-            $this->session->get( $this->getRolesSessionKey() )->shouldBeCalled()->willReturn( null );
+            $this->session->getRoles()->shouldBeCalled()->willReturn( null );
 
             $this->actor->morphToMany( 'Dencker\Watchtower\Models\Role', 'actor', 'watchtower_actors' )->shouldBeCalled();
 
-            $this->session->set( $this->getRolesSessionKey(), $this->roleCollection() )->shouldBeCalled();
-
-            $this->session->save()->shouldBeCalled();
+            $this->session->setRoles($this->roleCollection() )->shouldBeCalled();
 
 
             $this->actorHasRoles( $morphToMany );
@@ -91,7 +90,7 @@
 
         function it_retrieves_permissions_from_the_session(MorphToMany $morphToMany)
         {
-            $this->session->get( $this->getPermissionsSessionKey() )->willReturn( collect( [
+            $this->session->getPermissions()->willReturn( collect( [
                 Factory::build( 'permission', ['code' => 'permission_1'] ),
                 Factory::build( 'permission', ['code' => 'permission_2'] ),
                 Factory::build( 'permission', ['code' => 'permission_3'] )
@@ -171,7 +170,7 @@
 
         private function rolesShouldBeFetchedFromSession($role_collection = null)
         {
-            $this->session->get( $this->getRolesSessionKey() )->shouldBeCalled()->willReturn( $role_collection ?: $this->roleCollection() );
+            $this->session->getRoles()->shouldBeCalled()->willReturn( $role_collection ?: $this->roleCollection() );
             $this->actorRoleRelationShouldNotBeCalled();
         }
 
