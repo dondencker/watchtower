@@ -107,7 +107,6 @@
          * @param array|\Illuminate\Support\Collection $roles
          *
          * @return bool
-         * @internal param Arrayable $role
          *
          */
         public function attachRolesToActor(Model $actor, $roles)
