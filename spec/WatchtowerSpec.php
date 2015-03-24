@@ -2,24 +2,17 @@
 
     namespace spec\Dencker\Watchtower;
 
-    use Dencker\Watchtower\Contracts\WatchtowerActorContract;
-    use Dencker\Watchtower\Models\Role;
-    use Illuminate\Database\Eloquent\Builder;
+    use Dencker\Watchtower\Config;
     use Illuminate\Database\Eloquent\Collection;
-    use Illuminate\Database\Eloquent\Model;
-    use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-    use Illuminate\Database\Eloquent\Relations\HasMany;
     use Illuminate\Database\Eloquent\Relations\MorphToMany;
-    use Illuminate\Database\SQLiteConnection;
     use Illuminate\Session\SessionInterface as SessionContract;
     use Laracasts\TestDummy\Factory;
-    use PhpSpec\ObjectBehavior;
     use Prophecy\Argument;
     use Prophecy\Prophet;
     use spec\stubs\Actor;
     use spec\stubs\ActorWithoutContract;
 
-    class WatchtowerSpec extends ObjectBehavior
+    class WatchtowerSpec extends LaravelSpec
     {
         protected $actor;
         protected $session;
@@ -31,7 +24,10 @@
          */
         public function let(Actor $actor, SessionContract $session)
         {
-//        $actor = Factory::build('spec\stubs\Actor');
+            $config = (new Prophet)->prophesize('\Dencker\Watchtower\Config');
+            $config->get('primary_actor')->willReturn('spec\stubs\Actor');
+
+            Config::setInstance($config->reveal());
 
             $this->actor   = $actor;
             $this->session = $session;
