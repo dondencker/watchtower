@@ -2,7 +2,6 @@
 
 
 use Dencker\Watchtower\Watchtower;
-use Illuminate\Support\Facades\App;
 
 trait HasPermissions
 {
