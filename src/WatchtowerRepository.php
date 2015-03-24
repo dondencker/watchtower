@@ -3,9 +3,14 @@
 
 
     use DB;
+    use Dencker\Watchtower\Events\PermissionWasAttachedToRole;
+    use Dencker\Watchtower\Events\PermissionWasCreated;
+    use Dencker\Watchtower\Events\PermissionWasRemovedFromRole;
     use Dencker\Watchtower\Events\RolesWereAttachedToActor;
+    use Dencker\Watchtower\Events\RoleWasCreated;
     use Dencker\Watchtower\Models\Permission;
     use Dencker\Watchtower\Models\Role;
+    use Dencker\Watchtower\Models\WatchtowerActor;
     use Illuminate\Contracts\Events\Dispatcher;
     use Illuminate\Contracts\Support\Arrayable;
     use Illuminate\Database\DatabaseManager;
@@ -45,15 +50,14 @@
         {
             $code = $this->sanitizeRoleCode( $code, $name );
 
-
             $role = Role::create( compact( 'code', 'name', 'is_super_user' ) );
-
-//            dd($name, $code,$role);
 
             if ( is_array( $permission_codes ) && count( $permission_codes ) )
             {
                 $role->permissions()->sync( Permission::whereIn( 'code', $permission_codes )->lists( 'id' ) );
             }
+
+            $this->events->fire( new RoleWasCreated( $role ) );
 
             return $role;
         }
@@ -77,6 +81,8 @@
                 $attach_to_role->permissions()->save( $permission );
             }
 
+            $this->events->fire( new PermissionWasCreated( $permission ) );
+
             return $permission;
         }
 
@@ -90,19 +96,21 @@
          */
         public function attachRoleToActor(Model $actor, Role $role)
         {
-            $this->events->fire( new RolesWereAttachedToActor( $actor, collect( [$role] ) ) );
-
-            return $this->db->table( 'watchtower_actors' )->insert( [
+            WatchtowerActor::firstOrCreate( [
                 'role_id'    => $role->getKey(),
                 'actor_id'   => $actor->getKey(),
                 'actor_type' => $actor->getMorphClass(),
             ] );
+
+            $this->events->fire( new RolesWereAttachedToActor( $actor, collect( [$role] ) ) );
+
+            return true;
         }
 
         /**
          * Attaches a collection or array of roles to an actor
          *
-         * @param Model     $actor
+         * @param Model                                $actor
          *
          * @param array|\Illuminate\Support\Collection $roles
          *
@@ -111,20 +119,19 @@
          */
         public function attachRolesToActor(Model $actor, $roles)
         {
-            $insert = [];
 
             foreach ($roles as $role)
             {
-                $insert[] = [
+                WatchtowerActor::firstOrCreate( [
                     'role_id'    => $role->getKey(),
                     'actor_id'   => $actor->getKey(),
                     'actor_type' => $actor->getMorphClass(),
-                ];
+                ] );
             }
 
             $this->events->fire( new RolesWereAttachedToActor( $actor, $roles ) );
 
-            return $this->db->table( 'watchtower_actors' )->insert( $insert );
+            return true;
         }
 
 
@@ -138,7 +145,11 @@
          */
         public function addPermissionToRole(Permission $permission, Role $role)
         {
-            return $role->permissions()->save( $permission );
+            $role->permissions()->save( $permission );
+
+            $this->events->fire( new PermissionWasAttachedToRole( $permission, $role ) );
+
+            return true;
         }
 
         /**
@@ -152,7 +163,11 @@
          */
         public function removePermissionFromRole(Permission $permission, Role $role)
         {
-            return $role->permissions()->detach( $permission->id );
+            $role->permissions()->detach( $permission->id );
+
+            $this->events->fire( new PermissionWasRemovedFromRole( $permission, $role ) );
+
+            return true;
         }
 
         /**
