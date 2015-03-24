@@ -17,6 +17,8 @@ class WatchtowerPermissionRolePivot extends Migration {
                 $table->unsignedInteger('role_id');
                 $table->unsignedInteger('permission_id');
 
+            $table->unique(['role_id', 'permission_id']);
+
                 $table->foreign('role_id')->references('id')->on('watchtower_roles')->onDelete('cascade');
                 $table->foreign('permission_id')->references('id')->on('watchtower_permissions')->onDelete('cascade');
 		});

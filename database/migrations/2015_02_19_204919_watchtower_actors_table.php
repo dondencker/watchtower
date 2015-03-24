@@ -18,6 +18,8 @@ class WatchtowerActorsTable extends Migration {
             $table->string('actor_id');
             $table->string('actor_type');
 
+            $table->unique(['role_id','actor_id','actor_type']);
+
             $table->foreign('role_id')->references('id')->on('watchtower_roles')->onDelete('cascade');
 
         });
