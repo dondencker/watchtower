@@ -21,6 +21,8 @@ class WatchtowerServiceProvider extends ServiceProvider{
             if( $user && method_exists($user, 'watchtower') )
                 $user->watchtower()->clearSession();
         });
+
+        $this->app->bind('watchtower', 'Dencker\Watchtower\Watchtower');
     }
 
     /**
