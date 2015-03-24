@@ -105,12 +105,17 @@
         }
 
         /**
-         * Returns all available roles
+         * Returns all available roles, optionally eager loading any relationships
+         *
+         * @param null|string|array $with Relations to eager-load
          *
          * @return \Illuminate\Database\Eloquent\Collection|static[]
          */
-        public function allRoles()
+        public function allRoles($with = null)
         {
+            if ( !is_null( $with ) )
+                return Role::with( $with )->get();
+
             return Role::all();
         }
 
@@ -118,10 +123,15 @@
         /**
          * Returns all available permissions
          *
+         * @param null|string|array $with Relations to eager-load
+         *
          * @return \Illuminate\Database\Eloquent\Collection|static[]
          */
-        public function allPermissions()
+        public function allPermissions($with = null)
         {
+            if ( !is_null( $with ) )
+                return Permission::with( $with )->get();
+            
             return Permission::all();
         }
 
