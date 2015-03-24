@@ -17,7 +17,7 @@ trait HasPermissions
     public function watchtower()
     {
 
-        return $this->watchtower ?: $this->watchtower = new Watchtower($this, App::make('session')->driver());
+        return $this->watchtower ?: $this->watchtower = app('watchtower',[$this]);
     }
 
 
