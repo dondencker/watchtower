@@ -3,13 +3,33 @@
 
 
     use DB;
+    use Dencker\Watchtower\Events\RolesWereAttachedToActor;
     use Dencker\Watchtower\Models\Permission;
     use Dencker\Watchtower\Models\Role;
+    use Illuminate\Contracts\Events\Dispatcher;
+    use Illuminate\Contracts\Support\Arrayable;
+    use Illuminate\Database\DatabaseManager;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Support\Str;
 
     class WatchtowerRepository
     {
+        /** @var \Illuminate\Database\Connection */
+        protected $db;
+        /**
+         * @var Dispatcher
+         */
+        private $events;
+
+        /**
+         * @param DatabaseManager $db
+         * @param Dispatcher      $events
+         */
+        function __construct(DatabaseManager $db, Dispatcher $events)
+        {
+            $this->db     = $db->connection();
+            $this->events = $events;
+        }
 
         /**
          * Creates a role.
@@ -70,12 +90,44 @@
          */
         public function attachRoleToActor(Model $actor, Role $role)
         {
-            return DB::table( 'watchtower_actors' )->insert( [
+            $this->events->fire( new RolesWereAttachedToActor( $actor, collect( [$role] ) ) );
+
+            return $this->db->table( 'watchtower_actors' )->insert( [
                 'role_id'    => $role->getKey(),
                 'actor_id'   => $actor->getKey(),
                 'actor_type' => $actor->getMorphClass(),
             ] );
         }
+
+        /**
+         * Attaches a collection or array of roles to an actor
+         *
+         * @param Model     $actor
+         *
+         * @param array|\Illuminate\Support\Collection $roles
+         *
+         * @return bool
+         * @internal param Arrayable $role
+         *
+         */
+        public function attachRolesToActor(Model $actor, $roles)
+        {
+            $insert = [];
+
+            foreach ($roles as $role)
+            {
+                $insert[] = [
+                    'role_id'    => $role->getKey(),
+                    'actor_id'   => $actor->getKey(),
+                    'actor_type' => $actor->getMorphClass(),
+                ];
+            }
+
+            $this->events->fire( new RolesWereAttachedToActor( $actor, $roles ) );
+
+            return $this->db->table( 'watchtower_actors' )->insert( $insert );
+        }
+
 
         /**
          * Attaches a permission to a Role
@@ -131,9 +183,18 @@
         {
             if ( !is_null( $with ) )
                 return Permission::with( $with )->get();
-            
+
             return Permission::all();
         }
+
+        /**
+         * Sanitizes a role code, using the name to generate one if it isn't provided.
+         *
+         * @param string|null $code
+         * @param string      $name
+         *
+         * @return string
+         */
 
         private function sanitizeRoleCode($code, $name = "name")
         {
