@@ -32,7 +32,7 @@ class WatchtowerServiceProvider extends ServiceProvider{
     {
         $this->publishes([
             __DIR__."/../database/migrations" => base_path('database/migrations'),
-            __DIR__."/../config/watchtower.php" => base_path('watchtower.php')
+            __DIR__."/../config/watchtower.php" => config_path('watchtower.php')
         ]);
     }
 }
