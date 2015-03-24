@@ -28,7 +28,7 @@ trait HasPermissions
      */
     public function isSuperUser()
     {
-        return !! $this->watchtower()->isSuperUser();
+        return $this->watchtower()->isSuperUser();
     }
 
 
