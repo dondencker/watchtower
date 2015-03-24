@@ -3,6 +3,7 @@
     namespace spec\Dencker\Watchtower;
 
     use Illuminate\Session\SessionInterface as SessionContract;
+    use Illuminate\Session\SessionManager;
     use PhpSpec\ObjectBehavior;
     use Prophecy\Argument;
 
@@ -10,10 +11,12 @@
     {
         protected $session;
 
-        function let(SessionContract $session)
+        function let(SessionManager $session, SessionContract $session_contract)
         {
+            $this->session = $session_contract;
+            
+            $session->driver()->willReturn($session_contract);
             $this->beConstructedWith( $session );
-            $this->session = $session;
         }
 
         function it_is_initializable()

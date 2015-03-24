@@ -6,7 +6,6 @@
     use Dencker\Watchtower\Session;
     use Illuminate\Database\Eloquent\Collection;
     use Illuminate\Database\Eloquent\Relations\MorphToMany;
-    use Illuminate\Session\SessionInterface as SessionContract;
     use Laracasts\TestDummy\Factory;
     use Prophecy\Argument;
     use Prophecy\Prophet;

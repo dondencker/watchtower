@@ -1,21 +1,21 @@
 <?php namespace Dencker\Watchtower;
 
-use Illuminate\Session\SessionInterface as SessionContract;
+use Illuminate\Session\SessionInterface;
+use Illuminate\Session\SessionManager;
 
 class Session
 {
 
 
-    /**
-     * @var SessionContract
-     */
+    /** @var SessionInterface */
     private $session;
 
+    /** @var string  */
     private $prefix;
 
-    function __construct(SessionContract $session, $prefix = "watchtower.")
+    function __construct(SessionManager $session, $prefix = "watchtower.")
     {
-        $this->session = $session;
+        $this->session = $session->driver();
         $this->prefix  = $prefix;
     }
 
